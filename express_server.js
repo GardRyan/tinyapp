@@ -35,10 +35,11 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-app.post("/urls", (req, res) => {
+app.post("/login", (req, res) => {
   const username = 'username';
   
   res.cookie(`/login`);
+  res.redirect(`/urls`);  
 
 });
 
