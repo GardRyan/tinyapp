@@ -76,7 +76,15 @@ app.post("/register", (req, res) => {
 
   // Check if email or password is invalid
   if (email.length <= 6 || password.length <= 6) {
+
     return res.status(400).send(`Error 400: ${email} is not a valid email or ${password} is not a valid password`);
+
+  } 
+  
+  for (const userId in user) {
+    if (user[userId].email === email) {
+      return res.status(400).send(`Error 400: ${email} already exists in our database`);
+    }
   }
 
   // Set cookies for the user's information
