@@ -14,8 +14,7 @@
         <span class="navbar-text" id="email">
           <%= email ? `${email}` : '' %>
         </span>
-        
-        <% if (email) { %>
+         <% if (email) { %>
           <!-- If user is authenticated (logged in), display logout button -->
           <form method="POST" action="/logout">
             <button type="submit" class="btn btn-primary">Logout</button>
