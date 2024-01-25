@@ -35,18 +35,6 @@ function generateRandomString() {
   return randomString;
 }
 
-const authenticateUser = (req, res, next) => {
-  const user = req.cookies.userId; 
-  
-  if (user) {
-     next();
-   } else {
-     res.redirect("/login");
-   }
-}
-
-app.use(authenticateUser); 
-
 app.get("/register", (req, res) => {
   const id = generateRandomString();
   const email = "";
@@ -125,6 +113,15 @@ app.post("/login", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password; 
   
+  const authenticateUser = (req, res, next) => {
+    const user = req.cookies.userId; 
+    
+    if (user) {
+       next();
+     } else {
+       res.redirect("/login");
+     }
+  }
   let userId = null;
   for (const id in user) {
     if (user[id].email === enteredEmail && user[id].password === enteredPassword) {
@@ -139,6 +136,8 @@ app.post("/login", (req, res) => {
   } else {
     res.status(400).send("Error 400: Invalid email or password");
   }
+
+  app.use(authenticateUser); 
 });
 
 app.post("/logout", (req, res) => {

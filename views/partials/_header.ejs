@@ -12,9 +12,9 @@
         </div>
       <div class="navbar-nav ml-auto">
         <span class="navbar-text" id="email">
-          <%= email ? `${email}` : '' %>
+          <%= user ? `${user}` : '' %>
         </span>
-         <% if (email) { %>
+         <% if (user) { %>
           <!-- If user is authenticated (logged in), display logout button -->
           <form method="POST" action="/logout">
             <button type="submit" class="btn btn-primary">Logout</button>
