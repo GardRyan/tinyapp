@@ -35,6 +35,18 @@ function generateRandomString() {
   return randomString;
 }
 
+const authenticateUser = (req, res, next) => {
+  const user = req.cookies.userId; 
+  
+  if (user) {
+     next();
+   } else {
+     res.redirect("/login");
+   }
+}
+
+app.use(authenticateUser); 
+
 app.get("/register", (req, res) => {
   const id = generateRandomString();
   const email = "";
@@ -49,28 +61,34 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const user = req.cookies.userId;
+  const templateVars = { urls: urlDatabase, user };
+
+  res.render("login", templateVars, { user });
+});
 
 app.get("/urls", (req, res) => {
-  const user = req.cookies.id;
+  const user = req.cookies.userId;
   const templateVars = { urls: urlDatabase, user };
 
   res.render("urls_index", templateVars, { user });
 });
 
 app.get("/u/:id", (req, res) => {
-  const user = req.cookies.id;
+  const user = req.cookies.userId;
   const longURL = urlDatabase[req.params.id];
 
-  res.redirect(longURL, { user });
+  res.render("urls_show", { longURL, user });
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = req.cookies.id;
+  const user = req.cookies.userId;
   res.render("urls_new", { user });
 });
 
 app.post("/register", (req, res) => {
-  const id = generateRandomString();
+  const userId = generateRandomString();
   const email = req.body.email; // Extract email from the request body
   const password = req.body.password; // Extract password from the request body
 
@@ -88,7 +106,7 @@ app.post("/register", (req, res) => {
   }
 
   // Set cookies for the user's information
-  res.cookie("user_id", id);
+  res.cookie("user_id", userId);
   res.cookie("email", email);
   res.cookie("password", password);
 
@@ -97,20 +115,33 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const user = req.body.user;
 
-  res.cookie("user", user);
-  res.redirect(`/urls`);
-
+  const enteredEmail = req.body.email;
+  const enteredPassword = req.body.password; 
+  
+  let userId = null;
+  for (const id in user) {
+    if (user[id].email === enteredEmail && user[id].password === enteredPassword) {
+      userId = id;
+      break;
+    }
+  }
+  
+  if (userId) {
+    res.cookie("user_id", userId);
+    res.redirect("/urls");
+  } else {
+    res.status(400).send("Error 400: Invalid email or password");
+  }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user");
+  res.clearCookie("user_id");
   res.redirect(`/urls`);
 });
 
 app.post("/urls", (req, res) => {
-  const user = req.cookies.id;
+  const user = req.cookies.userId;
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
@@ -119,14 +150,14 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const id = req.params.id;
+  const id = req.params.userId;
   delete urlDatabase[id];
 
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
-  const shortURL = req.params.id;
+  const shortURL = req.params.userId;
   const longURL = req.body.longURL;
 
   urlDatabase[shortURL] = longURL;
