@@ -53,26 +53,28 @@ app.get("/login", (req, res) => {
   const user = req.cookies.userId;
   const templateVars = { urls: urlDatabase, user };
 
-  res.render("login", templateVars, { user });
+  res.render("login", templateVars);
 });
 
 app.get("/urls", (req, res) => {
   const user = req.cookies.userId;
   const templateVars = { urls: urlDatabase, user };
 
-  res.render("urls_index", templateVars, { user });
+  res.render("urls_index", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   const user = req.cookies.userId;
   const longURL = urlDatabase[req.params.id];
+  const templateVars = { urls: urlDatabase, longURL, user };
 
-  res.render("urls_show", { longURL, user });
+  res.render("urls_show", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const user = req.cookies.userId;
-  res.render("urls_new", { user });
+  const templateVars = { urls: urlDatabase, user };
+  res.render("urls_new", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -151,7 +153,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
 
-  res.redirect("/urls", { user });
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
