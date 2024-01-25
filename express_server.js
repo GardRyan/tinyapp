@@ -25,7 +25,8 @@ function generateRandomString() {
 app.get("/register", (req, res) => {
 
   const username = req.cookies.username;
-  const templateVars = { urls: urlDatabase, username };
+  const password = req.cookies.password;
+  const templateVars = { urls: urlDatabase, username, password};
 
   res.render("register", templateVars);
 });
