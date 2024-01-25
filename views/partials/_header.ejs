@@ -11,12 +11,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </div>
       <div class="navbar-nav ml-auto">
-        <span class="navbar-text" id="email">
-          <%= user ? `${user}` : '' %>
-        </span>
-         <% if (user) { %>
+        <% if (user) { %>
           <!-- If user is authenticated (logged in), display logout button -->
           <form method="POST" action="/logout">
+            <span class="navbar-text" id="email">
+              <%= user ? `${user}` : '' %></span>
             <button type="submit" class="btn btn-primary">Logout</button>
           </form>
           <% } else { %>
