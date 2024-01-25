@@ -9,17 +9,26 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        
+
       </div>
       <div class="navbar-nav ml-auto">
         <span class="navbar-text" id="username">
-          <%= username %>
+          <%= username ? `${username}` : '' %>
         </span>
-        <form class="form-inline" method="POST" action="/login">
-          <input class="form-control mr-sm-2" type="text" name="username" placeholder="Username" />
-          <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        
+
+        <% if (username) { %>
+          <!-- If user is authenticated (logged in), display logout button -->
+          <form class="form-inline" method="POST" action="/logout">
+            <button type="submit" class="btn btn-primary">Logout</button>
+          </form>
+          <% } else { %>
+            <!-- If user is not authenticated (not logged in), display login form -->
+            <form class="form-inline" method="POST" action="/login">
+              <input class="form-control mr-sm-2" type="text" name="username" placeholder="Username" />
+              <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <% } %>
+
       </div>
   </nav>
 </header>

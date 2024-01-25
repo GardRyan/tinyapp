@@ -30,12 +30,15 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.longURL];
-  res.redirect(longURL);
+  const username = req.cookies.username;
+  const longURL = urlDatabase[req.params.id];
+  
+  res.redirect(longURL, { username });
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const username = req.cookies.username;
+  res.render("urls_new", { username });
 });
 
 app.post("/login", (req, res) => {
@@ -44,6 +47,11 @@ app.post("/login", (req, res) => {
   res.cookie("username", username);
   res.redirect(`/urls`);
 
+});
+
+app.post("/logout", (req, res) => {
+    res.clearCookie("username");
+    res.redirect(`/urls`);
 });
 
 app.post("/urls", (req, res) => {
@@ -58,7 +66,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
-
+  
   res.redirect(`/urls`);
 });
 
@@ -68,12 +76,7 @@ app.post("/urls/:id/edit", (req, res) => {
 
   urlDatabase[shortURL] = longURL;
 
-  res.redirect(`/urls/${shortURL}`);
-});
-
-app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  res.render("urls_show", templateVars);
+  res.redirect(`/urls`);
 });
 
 app.get("/", (req, res) => {
