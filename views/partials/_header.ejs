@@ -9,8 +9,7 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/register">Register</a>
-       </div>
+        </div>
       <div class="navbar-nav ml-auto">
         <span class="navbar-text" id="email">
           <%= email ? `${email}` : '' %>
@@ -24,6 +23,7 @@
           <% } else { %>
             <!-- If user is not authenticated (not logged in), display login button -->
             <a class="btn btn-primary" href="/login">Login</a>
+            <a class="btn btn-primary" href="/register">Register</a>
           <% } %>
       </div>
   </nav>
