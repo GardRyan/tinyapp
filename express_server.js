@@ -18,7 +18,7 @@ const user = {
     email: "email",
     password: "password",
   },
-}
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -37,25 +37,22 @@ function generateRandomString() {
 
 app.get("/register", (req, res) => {
   const id = generateRandomString();
-  const email = `user${id}@example.com`; // Using a dummy email for simplicity
-  const password = `password${id}`; // Using a dummy password for simplicity
+  const email = "";
+  const password = "";
 
-  // Set cookies for the user's information
   res.cookie("user_id", id);
   res.cookie("email", email);
   res.cookie("password", password);
 
-  const templateVars = { urls: urlDatabase, user_id: id, email, password };
+  const templateVars = { urls: urlDatabase, user: id, email, password };
 
   res.render("register", templateVars);
-
-  console.log(`New user Registered! id: ${id}, email: ${email}, password: ${password}`);
 });
 
 
 app.get("/urls", (req, res) => {
   const user = req.cookies.id;
-  const templateVars = { urls: urlDatabase, email };
+  const templateVars = { urls: urlDatabase, user };
 
   res.render("urls_index", templateVars, { user });
 });
@@ -72,6 +69,25 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", { user });
 });
 
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  const email = req.body.email; // Extract email from the request body
+  const password = req.body.password; // Extract password from the request body
+
+  // Check if email or password is invalid
+  if (email.length <= 6 || password.length <= 6) {
+    return res.status(400).send(`Error 400: ${email} is not a valid email or ${password} is not a valid password`);
+  }
+
+  // Set cookies for the user's information
+  res.cookie("user_id", id);
+  res.cookie("email", email);
+  res.cookie("password", password);
+
+  res.redirect("/urls");
+  console.log(`New user Registered! id: ${id}, email: ${email}, password: ${password}`);
+});
+
 app.post("/login", (req, res) => {
   const user = req.body.user;
 
@@ -86,12 +102,12 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  const user = req.cookies.id;
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
 
-  res.redirect(`/urls`);
-
+  res.redirect("/urls", { user });
 });
 
 app.post("/urls/:id/delete", (req, res) => {
