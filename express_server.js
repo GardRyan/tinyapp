@@ -88,7 +88,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const userId = generateRandomString();
+  const newUserId = generateRandomString();
   const email = req.body.email; // Extract email from the request body
   const password = req.body.password; // Extract password from the request body
 
@@ -104,6 +104,12 @@ app.post("/register", (req, res) => {
       return res.status(400).send(`Error 400: ${email} already exists in our database`);
     }
   }
+
+  user[newUserId] = {
+    id: newUserIdserId,
+    email: email,
+    password: password,
+  };
 
   // Set cookies for the user's information
   res.cookie("user_id", userId);
