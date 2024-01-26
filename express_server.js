@@ -126,6 +126,10 @@ app.post("/login", (req, res) => {
   }
   let userId = null;
   for (const id in user) {
+    if (user[id].email === enteredEmail && user[id].password !== enteredPassword) {
+      res.status(403).send("Error 403: Invalid email or password");
+      break;
+    }
     if (user[id].email === enteredEmail && user[id].password === enteredPassword) {
       userId = id;
       break;
