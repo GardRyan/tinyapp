@@ -7,6 +7,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+<<<<<<< HEAD
 const user = {
   userRandomID: {
     id: "id",
@@ -20,6 +21,8 @@ const user = {
   },
 };
 
+=======
+>>>>>>> master
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -35,6 +38,7 @@ function generateRandomString() {
   return randomString;
 }
 
+<<<<<<< HEAD
 app.get("/register", (req, res) => {
   const id = generateRandomString();
   const email = "";
@@ -59,11 +63,17 @@ app.get("/login", (req, res) => {
 app.get("/urls", (req, res) => {
   const user = req.cookies.userId;
   const templateVars = { urls: urlDatabase, user };
+=======
+app.get("/urls", (req, res) => {
+  const username = req.cookies.username
+  const templateVars = { urls: urlDatabase, username };
+>>>>>>> master
 
   res.render("urls_index", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
+<<<<<<< HEAD
   const user = req.cookies.userId;
   const longURL = urlDatabase[req.params.id];
   const templateVars = { urls: urlDatabase, longURL, user };
@@ -153,10 +163,38 @@ app.post("/logout", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const user = req.cookies.userId;
+=======
+  const username = req.cookies.username;
+  const longURL = urlDatabase[req.params.id];
+  
+  res.redirect(longURL, { username });
+});
+
+app.get("/urls/new", (req, res) => {
+  const username = req.cookies.username;
+  res.render("urls_new", { username });
+});
+
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  
+  res.cookie("username", username);
+  res.redirect(`/urls`);
+
+});
+
+app.post("/logout", (req, res) => {
+    res.clearCookie("username");
+    res.redirect(`/urls`);
+});
+
+app.post("/urls", (req, res) => {
+>>>>>>> master
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
 
+<<<<<<< HEAD
   res.redirect("/urls");
 });
 
@@ -164,11 +202,25 @@ app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.userId;
   delete urlDatabase[id];
 
+=======
+  res.redirect(`/urls`);
+
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  
+>>>>>>> master
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
+<<<<<<< HEAD
   const shortURL = req.params.userId;
+=======
+  const shortURL = req.params.id;
+>>>>>>> master
   const longURL = req.body.longURL;
 
   urlDatabase[shortURL] = longURL;
