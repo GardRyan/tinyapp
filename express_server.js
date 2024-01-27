@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
-
+const { getUserByEmail } = require('../helpers.js');
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -59,17 +59,7 @@ function urlsForUser(id) {
   return userUrls;
 }
 
-const getUserByEmail = function(email, urlDatabase) {
-  for (let userId in urlDatabase) {
-    const user = urlDatabase[userId];
-    
-    if (user.email === email) {
-      return user;
-    }
-  }
 
-  return null; 
-};
 
 app.get("/register", (req, res) => {
 
@@ -256,4 +246,3 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Tinyapp! listening on port ${PORT}!`);
 });
-
