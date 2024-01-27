@@ -31,7 +31,7 @@
                 <%= id %>
               </td>
               <td>
-                <%= urls[id] %>
+                <a href="<%= urls[id].longURL %>" target="_blank"><%= urls[id].longURL %></a>
               </td>
               <td>
                 <form method="POST" action="/urls/<%= id %>/edit">

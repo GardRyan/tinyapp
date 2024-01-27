@@ -25,11 +25,11 @@ const users = {
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
+    userID: "Azmav2",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW",
+    userID: "Azmav2",
   },
 };
 
@@ -69,7 +69,8 @@ app.get("/login", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = req.cookies.userId;
-  const templateVars = { urls: urlsForUser, user };
+  const userURLs = urlsForUser(user);
+  const templateVars = { urls: userURLs, user };
 
   res.render("urls_index", templateVars);
 });
@@ -77,14 +78,16 @@ app.get("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const user = req.cookies.userId;
   const longURL = urlDatabase[req.params.id].longURL;
-  const templateVars = { urls: urlsForUser, longURL, user };
+  const userURLs = urlsForUser(user);
+  const templateVars = { urls: userURLs, longURL, user };
 
   res.render("urls_show", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const user = req.cookies.userId;
-  const templateVars = { urls: urlsForUser, user };
+  const userURLs = urlsForUser(user);
+  const templateVars = { urls: userURLs, user };
 
   if (!user) {
     res.redirect("/login");
@@ -138,17 +141,16 @@ app.post("/login", (req, res) => {
 
   let userId = null;
   for (const id in users) {
-    if (users[id].email === enteredEmail && !bcrypt.compareSync(enteredPassword, hashedPassword)) {
+    if (users[id].email === enteredEmail && !bcrypt.compareSync(enteredPassword, users[id].password)) {
       res.status(403).send("Error 403: Invalid email or password");
       break;
     }
-    if (users[id].email === enteredEmail && bcrypt.compareSync(enteredPassword, hashedPassword)) {
+    if (users[id].email === enteredEmail && bcrypt.compareSync(enteredPassword, users[id].password)) {
       userId = id;
       break;
     }
   }
   
-
   if (!userId) {
     res.status(400).send("Error 400: Invalid email or password");
     return;
@@ -178,10 +180,10 @@ app.post("/urls", (req, res) => {
     res.send("Please provide a proper URL");
     return;
   }
-
+  console.log(`What's happening here!?!?!?!`)
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = { longURL, userID };
-
+  console.log(urlDatabase);
   res.redirect("/urls");
 });
 
