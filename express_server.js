@@ -31,11 +31,11 @@ const users = {
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "666",
+    userId: "666",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "666",
+    userId: "666",
   },
 };
 
@@ -52,12 +52,24 @@ function generateRandomString() {
 function urlsForUser(id) {
   const userUrls = {};
   for (let urlId in urlDatabase) {
-    if (urlDatabase[urlId].userID === id) {
+    if (urlDatabase[urlId].userId === id) {
       userUrls[urlId] = urlDatabase[urlId];
     }
   }
   return userUrls;
 }
+
+const getUserByEmail = function(email, urlDatabase) {
+  for (let userId in urlDatabase) {
+    const user = urlDatabase[userId];
+    
+    if (user.email === email) {
+      return user;
+    }
+  }
+
+  return null; 
+};
 
 app.get("/register", (req, res) => {
 
@@ -82,11 +94,14 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+ console.log(urlDatabase); 
+ 
   const user = req.session.userId;
-  const longURL = urlDatabase[req.params.id].longURL;
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL].longURL;
   const userURLs = urlsForUser(user);
-  const templateVars = { urls: userURLs, longURL, user };
-
+  const templateVars = { urls: userURLs, longURL, user, id: shortURL };
+  
   res.render("urls_show", templateVars);
 });
 
@@ -134,7 +149,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword,
   };
 
-  req.session.user_id = newUserId;
+  req.session.userId = newUserId;
   res.redirect("/urls");
 
 });
@@ -163,20 +178,19 @@ app.post("/login", (req, res) => {
     return;
   }
 
-  req.session.user_id = userId;
+  req.session.userId = userId;
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  req.session = null;;
+  req.session = null;
   res.redirect("/login");
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.session.userId;
 
-  const userID = req.session.userId;
-
-  if (!userID) {
+   if (!userId) {
     res.send("Please login to shorten URLs");
     return;
   }
@@ -189,35 +203,39 @@ app.post("/urls", (req, res) => {
   }
 
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = { longURL, userID };
+  urlDatabase[shortURL] = { longURL, userId };
 
+  
   res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const userID = req.session.userId;
+  const userId = req.session.userId;
   const id = req.params.id;
+
   delete urlDatabase[id];
 
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
-  const userID = req.session.userId;
+  const userId = req.session.userId;
 
-  if (!userID) {
+  if (!userId) {
     res.send("Please login to shorten URLs");
     return;
   }
 
-  const longURL = req.body.longURL;
+  const longURL = req.body.newLongURL;
 
-  if (!longURL) {
-    res.send("Please provide a proper URL");
+  const shortURL = req.params.id;
+
+  // Check if shortURL exists in urlDatabase
+  if (!urlDatabase[shortURL]) {
+    res.status(404).send("URL not found");
     return;
   }
 
-  const shortURL = req.params.id;
   urlDatabase[shortURL].longURL = longURL;
 
   res.redirect("/urls");
