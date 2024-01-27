@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
+
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -74,7 +76,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const user = req.cookies.userId;
-  const longURL = urlDatabase.id[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   const templateVars = { urls: urlsForUser, longURL, user };
 
   res.render("urls_show", templateVars);
@@ -95,6 +97,7 @@ app.post("/register", (req, res) => {
   
   const email = req.body.email; // Extract email from the request body
   const password = req.body.password; // Extract password from the request body
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   // Check if email or password is invalid
   if (email.length <= 6 || password.length <= 6) {
@@ -119,7 +122,7 @@ app.post("/register", (req, res) => {
   users[newUserId] = {
     id: newUserId,
     email: email,
-    password: password,
+    password: hashedPassword,
   };
 
   res.cookie("userId", newUserId);
@@ -131,14 +134,15 @@ app.post("/login", (req, res) => {
 
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
-  
+  const hashedPassword = bcrypt.hashSync(enteredPassword, 10);
+
   let userId = null;
   for (const id in users) {
-    if (users[id].email === enteredEmail && users[id].password !== enteredPassword) {
+    if (users[id].email === enteredEmail && !bcrypt.compareSync(enteredPassword, hashedPassword)) {
       res.status(403).send("Error 403: Invalid email or password");
       break;
     }
-    if (users[id].email === enteredEmail && users[id].password === enteredPassword) {
+    if (users[id].email === enteredEmail && bcrypt.compareSync(enteredPassword, hashedPassword)) {
       userId = id;
       break;
     }
