@@ -11,4 +11,4 @@ const getUserByEmail = function(email, urlDatabase) {
   return null; 
 };
 
-modules.export = { getUserByEmail }
+module.exports = { getUserByEmail }

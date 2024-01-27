@@ -16,14 +16,14 @@ const testUsers = {
 };
 
 describe('getUserByEmail', function() {
-  it('should return a user with valid email', function() {
+  it('should return a user with correct id', function() {
     const user = getUserByEmail("user@example.com", testUsers)
     const expectedUserID = "userRandomID";
-    assert('1234@gmail.com' === user[id].email, `${user[id].email} is valid` )
+    assert.equal(user.id, expectedUserID, `User ID should be ${expectedUserID}`);
   });
-  it('should return a user with invalid email', function() {
-    const user = getUserByEmail("user@example.com", testUsers)
-    const expectedUserID = "userRandomID";
-    assert('12345@gmail.com' !== user[id].email, `${user[id].email} is invalid` )
+  it('should return a user with the correct email', function() {
+    const user = getUserByEmail("user2@example.com", testUsers)
+    const expectedUserEmail = "user2@example.com";
+    assert.equal(user.email, expectedUserEmail, 'User should have the correct email');
   });
 });
