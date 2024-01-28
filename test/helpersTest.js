@@ -2,6 +2,12 @@ const { assert } = require('chai');
 
 const { getUserByEmail } = require('../helpers.js');
 
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const { expect } = chai;
+
+chai.use(chaiHttp);
+
 const testUsers = {
   "userRandomID": {
     id: "userRandomID", 
@@ -25,5 +31,61 @@ describe('getUserByEmail', function() {
     const user = getUserByEmail("user2@example.com", testUsers)
     const expectedUserEmail = "user2@example.com";
     assert.equal(user.email, expectedUserEmail, 'User should have the correct email');
+  });
+});
+
+
+
+describe("Login and Access Control Test", () => {
+  it('should return 403 status code for unauthorized access to "http://localhost:3000/urls/b2xVn2"', () => {
+    const agent = chai.request.agent("http://localhost:3000");
+
+    // Step 1: Login with valid credentials
+    return agent
+      .post("/login")
+      .send({ email: "user2@example.com", password: "dishwasher-funk" })
+      .then((loginRes) => {
+        // Step 2: Make a GET request to a protected resource
+        return agent.get("/urls/b2xVn2").then((accessRes) => {
+          // Step 3: Expect the status code to be 403
+          expect(accessRes).to.have.status(403);
+        });
+      });
+  });
+});
+
+
+
+const app = require('../express_server.js'); // Replace with the actual import statement for your Express app
+
+describe('GET Requests', function() {
+  const agent = chai.request.agent(app); // Creating an agent for session persistence
+
+  // Assuming your Express app handles sessions and redirects properly
+
+  it('should redirect / to /login with status code 302', async function() {
+    const res = await agent.get('http://localhost:8080/');
+    expect(res).to.redirectTo('http://localhost:8080/login');
+    expect(res).to.have.status(302);
+  });
+
+  it('should redirect /urls/new to /login with status code 302', async function() {
+    const res = await agent.get('http://localhost:8080/urls/new');
+    expect(res).to.redirectTo('http://localhost:8080/login');
+    expect(res).to.have.status(302);
+  });
+
+  it('should return status code 404 for non-existing URL', async function() {
+    const res = await agent.get('http://localhost:8080/urls/NOTEXISTS');
+    expect(res).to.have.status(404);
+  });
+
+  it('should return status code 403 for an existing URL without proper authentication', async function() {
+    const res = await agent.get('http://localhost:8080/urls/b6UTxQ');
+    expect(res).to.have.status(403);
+  });
+
+  after(function() {
+    agent.close(); // Close the agent after all tests are done
   });
 });
