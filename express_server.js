@@ -101,22 +101,20 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const user = req.session.userId;
   const shortURL = req.params.id;
-  
- 
+
   if (!urlDatabase[shortURL]) {
     return res.status(404).send(`Error 404: The URL does not exist!`);
   }
-
 
   if (!user || user !== urlDatabase[shortURL].userId) {
     return res.status(403).send(`Error 403: Unauthorized access!`);
   }
 
-  const longURL = urlDatabase[shortURL].longURL; 
-    const templateVars = { 
-    id: shortURL, 
-    longURL: longURL, 
-    user: user
+  const longURL = urlDatabase[shortURL].longURL;
+  const templateVars = {
+    id: shortURL,
+    longURL: longURL,
+    user: user,
   };
 
   res.render("urls_show", templateVars);
@@ -125,7 +123,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls/:id/edit", (req, res) => {
   const user = req.session.userId;
   const shortURL = req.params.id;
-  
+
   // Checking if the shortURL exists in your database
   if (!urlDatabase[shortURL]) {
     return res.status(404).send(`Error 404: The URL does not exist!`);
@@ -137,10 +135,10 @@ app.get("/urls/:id/edit", (req, res) => {
   }
 
   const longURL = urlDatabase[shortURL].longURL; // Fetching longURL
-  const templateVars = { 
-    id: shortURL, 
+  const templateVars = {
+    id: shortURL,
     longURL: longURL, // Make sure this matches what's expected in your ejs template
-    user: user
+    user: user,
   };
 
   res.render("urls_show", templateVars); // Rendering the page with the correct information
@@ -194,14 +192,11 @@ app.post("/login", (req, res) => {
   let userId = null;
   for (const id in users) {
     if (users[id].email === enteredEmail) {
-      if (bcrypt.compareSync(enteredPassword, users[id].password)) {
-        userId = id;
-        break;
-      } else {
+      if (!bcrypt.compareSync(enteredPassword, users[id].password)) {
         res.status(403).send("Error 403: Invalid email or password");
-        return;
-      }
+      } 
     }
+    userId = id; 
   }
 
   if (!userId) {
