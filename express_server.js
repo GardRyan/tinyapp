@@ -101,16 +101,23 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const user = req.session.userId;
   const shortURL = req.params.id;
-
+  
+ 
   if (!urlDatabase[shortURL]) {
     return res.status(404).send(`Error 404: The URL does not exist!`);
   }
+
+
   if (!user || user !== urlDatabase[shortURL].userId) {
-    return res.status(403).send(`Error 403: unauthorized access!`);
+    return res.status(403).send(`Error 403: Unauthorized access!`);
   }
 
-  const userURLs = urlsForUser(user);
-  const templateVars = { urls: userURLs, user, id: shortURL };
+  const longURL = urlDatabase[shortURL].longURL; 
+    const templateVars = { 
+    id: shortURL, 
+    longURL: longURL, 
+    user: user
+  };
 
   res.render("urls_show", templateVars);
 });
