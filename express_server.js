@@ -22,7 +22,7 @@ const users = {
   666: {
     id: "666",
     email: "1234@gmail.com",
-    password: "7418529",
+    password: "123456789",
   },
   user2RandomID: {
     id: "id",
@@ -118,19 +118,25 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls/:id/edit", (req, res) => {
   const user = req.session.userId;
   const shortURL = req.params.id;
-
+  
+  // Checking if the shortURL exists in your database
   if (!urlDatabase[shortURL]) {
     return res.status(404).send(`Error 404: The URL does not exist!`);
   }
 
+  // Ensuring the user is authorized and exists
   if (!user || user !== urlDatabase[shortURL].userId) {
-    return res.status(403).send(`Error 403: unauthorized access!`);
+    return res.status(403).send(`Error 403: Unauthorized access!`);
   }
 
-  const userURLs = urlsForUser(user);
-  const templateVars = { urls: userURLs, user, id: shortURL };
+  const longURL = urlDatabase[shortURL].longURL; // Fetching longURL
+  const templateVars = { 
+    id: shortURL, 
+    longURL: longURL, // Make sure this matches what's expected in your ejs template
+    user: user
+  };
 
-  res.render("urls_show", templateVars);
+  res.render("urls_show", templateVars); // Rendering the page with the correct information
 });
 
 app.post("/register", (req, res) => {
@@ -192,7 +198,7 @@ app.post("/login", (req, res) => {
   }
 
   if (!userId) {
-    res.status(403).send("Error 400: Invalid email or password");
+    res.status(400).send("Error 400: Invalid email or password");
     return;
   }
 
