@@ -39,8 +39,8 @@ describe('getUserByEmail', function() {
 
 
 describe("Login and Access Control Test", () => {
-  it('should return 403 status code for unauthorized access to "http://localhost:3000/urls/b6UTxQ"', () => {
-    const agent = chai.request.agent("http://localhost:3000");
+  it('should return 403 status code for unauthorized access to "http://localhost:8080/urls/b6UTxQ"', () => {
+    const agent = chai.request.agent("http://localhost:8080");
 
     // Step 1: Login with valid credentials
     return agent
@@ -58,29 +58,38 @@ describe("Login and Access Control Test", () => {
 
 
 describe('GET Requests', function() {
-  const agent = chai.request.agent(app); // Creating an agent for session persistence
+  const agent = chai.request.agent("http://localhost:8080"); // Creating an agent for session persistence
 
   // Assuming your Express app handles sessions and redirects properly
 
   it('should redirect / to /login with status code 302', async function() {
-    const res = await agent.get('http://localhost:8080/');
-    expect(res).to.redirectTo('http://localhost:8080/login');
-    expect(res).to.have.status(302);
+    // const res = await agent.get('/');
+    // console.log(res.status);
+    // expect(res).to.redirectTo('http://localhost:8080/login');
+    // expect(res).to.have.status(302);
+
+return agent
+      .get('/')
+      .then((res) => {
+        expect(res).to.redirect;
+        expect(res).to.redirectTo('http://localhost:8080/login');
+        expect(res).to.have.status(302);
+      });
   });
 
   it('should redirect /urls/new to /login with status code 302', async function() {
-    const res = await agent.get('http://localhost:8080/urls/new');
+    const res = await agent.get('/urls/new');
     expect(res).to.redirectTo('http://localhost:8080/login');
     expect(res).to.have.status(302);
   });
 
   it('should return status code 404 for non-existing URL', async function() {
-    const res = await agent.get('http://localhost:8080/urls/NOTEXISTS');
+    const res = await agent.get('/urls/NOTEXISTS');
     expect(res).to.have.status(404);
   });
 
   it('should return status code 403 for an existing URL without proper authentication', async function() {
-    const res = await agent.get('http://localhost:8080/urls/b6UTxQ');
+    const res = await agent.get('/urls/b6UTxQ');
     expect(res).to.have.status(403);
   });
 
