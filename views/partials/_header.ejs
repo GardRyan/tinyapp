@@ -15,7 +15,7 @@
           <!-- If user is authenticated (logged in), display logout button -->
           <form method="POST" action="/logout">
             <span class="navbar-text" id="email">
-              <%= user ? `${user}` : '' %></span>
+              <%= user ? `${user.email}` : '+++' %></span>
             <button type="submit" class="btn btn-primary">Logout</button>
           </form>
           <% } else { %>

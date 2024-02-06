@@ -1,24 +1,24 @@
 const users = {
-  666: {
+  "666": {
     id: "666",
     email: "1234@gmail.com",
     password: "123456789",
   },
-  user2RandomID: {
-    id: "id",
-    email: "email",
-    password: "password",
+  "abcd": {
+    id: "abcd",
+    email: "abcd@gmail.com",
+    password: "$2a$10$dywDacfN.aDKxBT8AUgjT.6aRzkSeZ6FzJNqnXBixEL4laAYoQ.ue",
   },
 };
 
 const urlDatabase = {
-  b6UTxQ: {
+  "b6UTxQ": {
     longURL: "https://www.tsn.ca",
     userId: "666",
   },
-  i3BoGr: {
+  "i3BoGr": {
     longURL: "https://www.google.ca",
-    userId: "666",
+    userId: "abcd",
   },
 };
 

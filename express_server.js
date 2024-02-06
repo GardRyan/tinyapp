@@ -41,15 +41,17 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user = req.session.userId;
-  const userURLs = urlsForUser(user);
+  const userId = req.session.userId;
+  const userURLs = urlsForUser(userId);
+  const user = users[userId];
   const templateVars = { urls: userURLs, user };
 
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = req.session.userId;
+  const userId = req.session.userId;
+  const user = users[userId];
   if (!user) {
     res.redirect("/login");
   } else {
@@ -82,7 +84,13 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/urls/:id/edit", (req, res) => {
-  const user = req.session.userId;
+  const userId = req.session.userId;
+  // Ensuring the user is authorized and exists
+  if (!userId) {
+    res.redirect("/login");
+  }
+  console.log('changed');
+  const user = users[userId];
   const shortURL = req.params.id;
 
   // Checking if the shortURL exists in your database
@@ -126,12 +134,11 @@ app.post("/register", (req, res) => {
       );
   }
 
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return res
-        .status(400)
-        .send(`Error 400: ${email} already exists in our database`);
-    }
+  const user = getUserByEmail(email, users);
+  if (user) {
+    return res
+      .status(400)
+      .send(`Error 400: ${email} already exists in our database`);
   }
 
   const newUserId = generateRandomString();
