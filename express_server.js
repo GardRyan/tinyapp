@@ -7,6 +7,8 @@ const {
   getUserByEmail,
   generateRandomString,
   urlsForUser,
+  users,
+  urlDatabase,
 } = require("./helpers.js");
 
 app.set("view engine", "ejs");
@@ -149,13 +151,15 @@ app.post("/login", (req, res) => {
   const enteredPassword = req.body.password;
 
   let userId = null;
-  for (const id in users) {
-    if (users[id].email === enteredEmail) {
-      if (!bcrypt.compareSync(enteredPassword, users[id].password)) {
-        res.status(403).send("Error 403: Invalid email or password");
-      }
+  const user = getUserByEmail(enteredEmail, users);
+  if (user) {
+    if (!bcrypt.compareSync(enteredPassword, user.password)) {
+      res.status(403).send("Error 403: Invalid email or password");
+    } else {
+      userId = user.id;
     }
-    userId = id;
+  } else {
+    res.status(403).send("Error 403: Invalid email or password");
   }
 
   if (!userId) {

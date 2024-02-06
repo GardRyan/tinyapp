@@ -55,4 +55,4 @@ function urlsForUser(id) {
   return userUrls;
 }
 
-module.exports = { getUserByEmail, generateRandomString, urlsForUser };
+module.exports = { getUserByEmail, generateRandomString, urlsForUser, users, urlDatabase};
