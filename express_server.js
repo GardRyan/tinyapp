@@ -25,9 +25,16 @@ app.use(
 );
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: null };
+  const userId = req.session.userId;
+  const user = users[userId];
 
-  res.render("register", templateVars);
+  if (user) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = { user: null };
+
+    res.render("register", templateVars);
+  }
 });
 
 app.get("/", (req, res) => {
@@ -35,9 +42,16 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { user: null };
+  const userId = req.session.userId;
+  const user = users[userId];
 
-  res.render("login", templateVars);
+  if (user) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = { user: null };
+
+    res.render("login", templateVars);
+  }
 });
 
 app.get("/urls", (req, res) => {
