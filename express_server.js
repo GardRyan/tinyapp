@@ -80,6 +80,23 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+app.get("/u/:id", (req, res) => {
+  const userId = req.session.userId;
+  const user = users[userId];
+  const shortURL = req.params.id;
+
+  if (!user) {
+    res.redirect("/login");
+  } else {
+    if (!urlDatabase[shortURL]) {
+      return res.status(404).send(`Error 404: The URL does not exist!`);
+    }
+
+    const longURL = urlDatabase[shortURL].longURL;
+    res.redirect(longURL);
+  }
+});
+
 app.get("/urls/:id", (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
