@@ -42,6 +42,11 @@ app.get("/login", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userId = req.session.userId;
+
+  if (!userId) {
+    res.redirect("/login");
+  }
+
   const userURLs = urlsForUser(userId);
   const user = users[userId];
   const templateVars = { urls: userURLs, user };
@@ -62,14 +67,20 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const user = req.session.userId;
+  const userId = req.session.userId;
   const shortURL = req.params.id;
+
+  if (!userId) {
+    res.redirect("/login");
+  }
+
+  const user = users[userId];
 
   if (!urlDatabase[shortURL]) {
     return res.status(404).send(`Error 404: The URL does not exist!`);
   }
 
-  if (!user || user !== urlDatabase[shortURL].userId) {
+  if (user !== urlDatabase[shortURL].userId) {
     return res.status(403).send(`Error 403: Unauthorized access!`);
   }
 
@@ -89,7 +100,7 @@ app.get("/urls/:id/edit", (req, res) => {
   if (!userId) {
     res.redirect("/login");
   }
-  console.log('changed');
+
   const user = users[userId];
   const shortURL = req.params.id;
 
