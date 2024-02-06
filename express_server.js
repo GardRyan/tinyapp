@@ -42,21 +42,21 @@ app.get("/login", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userId = req.session.userId;
-
-  if (!userId) {
-    res.redirect("/login");
-  }
-
-  const userURLs = urlsForUser(userId);
   const user = users[userId];
-  const templateVars = { urls: userURLs, user };
 
-  res.render("urls_index", templateVars);
+  if (!user) {
+    res.redirect("/login");
+  } else {
+    const userURLs = urlsForUser(userId);
+    const templateVars = { urls: userURLs, user };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
+
   if (!user) {
     res.redirect("/login");
   } else {
@@ -72,26 +72,26 @@ app.get("/urls/:id", (req, res) => {
 
   if (!userId) {
     res.redirect("/login");
+  } else {
+    const user = users[userId];
+
+    if (!urlDatabase[shortURL]) {
+      return res.status(404).send(`Error 404: The URL does not exist!`);
+    }
+
+    if (user !== urlDatabase[shortURL].userId) {
+      return res.status(403).send(`Error 403: Unauthorized access!`);
+    }
+
+    const longURL = urlDatabase[shortURL].longURL;
+    const templateVars = {
+      id: shortURL,
+      longURL: longURL,
+      user: user,
+    };
+
+    res.render("urls_show", templateVars);
   }
-
-  const user = users[userId];
-
-  if (!urlDatabase[shortURL]) {
-    return res.status(404).send(`Error 404: The URL does not exist!`);
-  }
-
-  if (user !== urlDatabase[shortURL].userId) {
-    return res.status(403).send(`Error 403: Unauthorized access!`);
-  }
-
-  const longURL = urlDatabase[shortURL].longURL;
-  const templateVars = {
-    id: shortURL,
-    longURL: longURL,
-    user: user,
-  };
-
-  res.render("urls_show", templateVars);
 });
 
 app.get("/urls/:id/edit", (req, res) => {
@@ -99,29 +99,29 @@ app.get("/urls/:id/edit", (req, res) => {
   // Ensuring the user is authorized and exists
   if (!userId) {
     res.redirect("/login");
+  } else {
+    const user = users[userId];
+    const shortURL = req.params.id;
+
+    // Checking if the shortURL exists in your database
+    if (!urlDatabase[shortURL]) {
+      return res.status(404).send(`Error 404: The URL does not exist!`);
+    }
+
+    // Ensuring the user is authorized and exists
+    if (!user || user !== urlDatabase[shortURL].userId) {
+      return res.status(403).send(`Error 403: Unauthorized access!`);
+    }
+
+    const longURL = urlDatabase[shortURL].longURL; // Fetching longURL
+    const templateVars = {
+      id: shortURL,
+      longURL: longURL, // Make sure this matches what's expected in your ejs template
+      user: user,
+    };
+
+    res.render("urls_show", templateVars); // Rendering the page with the correct information
   }
-
-  const user = users[userId];
-  const shortURL = req.params.id;
-
-  // Checking if the shortURL exists in your database
-  if (!urlDatabase[shortURL]) {
-    return res.status(404).send(`Error 404: The URL does not exist!`);
-  }
-
-  // Ensuring the user is authorized and exists
-  if (!user || user !== urlDatabase[shortURL].userId) {
-    return res.status(403).send(`Error 403: Unauthorized access!`);
-  }
-
-  const longURL = urlDatabase[shortURL].longURL; // Fetching longURL
-  const templateVars = {
-    id: shortURL,
-    longURL: longURL, // Make sure this matches what's expected in your ejs template
-    user: user,
-  };
-
-  res.render("urls_show", templateVars); // Rendering the page with the correct information
 });
 
 app.post("/register", (req, res) => {
