@@ -82,13 +82,12 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const userId = req.session.userId;
+  const user = users[userId];
   const shortURL = req.params.id;
 
-  if (!userId) {
+  if (!user) {
     res.redirect("/login");
   } else {
-    const user = users[userId];
-
     if (!urlDatabase[shortURL]) {
       return res.status(404).send(`Error 404: The URL does not exist!`);
     }
@@ -110,11 +109,11 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/urls/:id/edit", (req, res) => {
   const userId = req.session.userId;
+  const user = users[userId];
   // Ensuring the user is authorized and exists
-  if (!userId) {
+  if (!user) {
     res.redirect("/login");
   } else {
-    const user = users[userId];
     const shortURL = req.params.id;
 
     // Checking if the shortURL exists in your database
@@ -123,7 +122,7 @@ app.get("/urls/:id/edit", (req, res) => {
     }
 
     // Ensuring the user is authorized and exists
-    if (!user || user !== urlDatabase[shortURL].userId) {
+    if (userId !== urlDatabase[shortURL].userId) {
       return res.status(403).send(`Error 403: Unauthorized access!`);
     }
 
@@ -233,6 +232,10 @@ app.post("/urls/:id/delete", (req, res) => {
   const userId = req.session.userId;
   const id = req.params.id;
 
+  if (!userId) {
+    res.redirect("/login");
+  }
+
   delete urlDatabase[id];
 
   res.redirect(`/urls`);
@@ -240,8 +243,9 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id/edit", (req, res) => {
   const userId = req.session.userId;
+  const user = users[userId];
 
-  if (!userId) {
+  if (!user) {
     res.send("Please login to edit URLs");
     return;
   }
