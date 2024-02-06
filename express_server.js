@@ -3,7 +3,11 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
-const { getUserByEmail } = require("./helpers.js");
+const {
+  getUserByEmail,
+  generateRandomString,
+  urlsForUser,
+} = require("./helpers.js");
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -17,51 +21,6 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
-
-const users = {
-  666: {
-    id: "666",
-    email: "1234@gmail.com",
-    password: "123456789",
-  },
-  user2RandomID: {
-    id: "id",
-    email: "email",
-    password: "password",
-  },
-};
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userId: "666",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userId: "666",
-  },
-};
-
-function generateRandomString() {
-  let characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let randomString = "";
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    randomString += characters[randomIndex];
-  }
-  return randomString;
-}
-
-function urlsForUser(id) {
-  const userUrls = {};
-  for (let urlId in urlDatabase) {
-    if (urlDatabase[urlId].userId === id) {
-      userUrls[urlId] = urlDatabase[urlId];
-    }
-  }
-  return userUrls;
-}
 
 app.get("/register", (req, res) => {
   const templateVars = { user: null };
@@ -194,9 +153,9 @@ app.post("/login", (req, res) => {
     if (users[id].email === enteredEmail) {
       if (!bcrypt.compareSync(enteredPassword, users[id].password)) {
         res.status(403).send("Error 403: Invalid email or password");
-      } 
+      }
     }
-    userId = id; 
+    userId = id;
   }
 
   if (!userId) {
