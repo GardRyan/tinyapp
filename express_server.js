@@ -7,6 +7,7 @@ const {
   getUserByEmail,
   generateRandomString,
   urlsForUser,
+  accessBouncer,
   users,
   urlDatabase,
 } = require("./helpers.js");
@@ -54,104 +55,79 @@ app.get("/login", (req, res) => {
   }
 });
 
-app.get("/urls", (req, res) => {
+app.get("/urls", accessBouncer, (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
-
-  if (!user) {
-    res.redirect("/login");
-  } else {
-    const userURLs = urlsForUser(userId);
-    const templateVars = { urls: userURLs, user };
-    res.render("urls_index", templateVars);
-  }
+  const userURLs = urlsForUser(userId);
+  const templateVars = { urls: userURLs, user };
+  res.render("urls_index", templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
+app.get("/urls/new", accessBouncer, (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
-
-  if (!user) {
-    res.redirect("/login");
-  } else {
-    const userURLs = urlsForUser(user);
-    const templateVars = { urls: userURLs, user };
-    res.render("urls_new", templateVars);
-  }
+  const userURLs = urlsForUser(user);
+  const templateVars = { urls: userURLs, user };
+  res.render("urls_new", templateVars);
 });
 
-app.get("/u/:id", (req, res) => {
+app.get("/u/:id", accessBouncer, (req, res) => {
+  const shortURL = req.params.id;
+
+  if (!urlDatabase[shortURL]) {
+    return res.status(404).send(`Error 404: The URL does not exist!`);
+  }
+
+  const longURL = urlDatabase[shortURL].longURL;
+  res.redirect(longURL);
+});
+
+app.get("/urls/:id", accessBouncer, (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
   const shortURL = req.params.id;
 
-  if (!user) {
-    res.redirect("/login");
-  } else {
-    if (!urlDatabase[shortURL]) {
-      return res.status(404).send(`Error 404: The URL does not exist!`);
-    }
-
-    const longURL = urlDatabase[shortURL].longURL;
-    res.redirect(longURL);
+  if (!urlDatabase[shortURL]) {
+    return res.status(404).send(`Error 404: The URL does not exist!`);
   }
+
+  if (userId !== urlDatabase[shortURL].userId) {
+    return res.status(403).send(`Error 403: Unauthorized access!`);
+  }
+
+  const longURL = urlDatabase[shortURL].longURL;
+  const templateVars = {
+    id: shortURL,
+    longURL: longURL,
+    user: user,
+  };
+
+  res.render("urls_show", templateVars);
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id/edit", accessBouncer, (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
   const shortURL = req.params.id;
 
-  if (!user) {
-    res.redirect("/login");
-  } else {
-    if (!urlDatabase[shortURL]) {
-      return res.status(404).send(`Error 404: The URL does not exist!`);
-    }
-
-    if (user !== urlDatabase[shortURL].userId) {
-      return res.status(403).send(`Error 403: Unauthorized access!`);
-    }
-
-    const longURL = urlDatabase[shortURL].longURL;
-    const templateVars = {
-      id: shortURL,
-      longURL: longURL,
-      user: user,
-    };
-
-    res.render("urls_show", templateVars);
+  // Checking if the shortURL exists in your database
+  if (!urlDatabase[shortURL]) {
+    return res.status(404).send(`Error 404: The URL does not exist!`);
   }
-});
 
-app.get("/urls/:id/edit", (req, res) => {
-  const userId = req.session.userId;
-  const user = users[userId];
   // Ensuring the user is authorized and exists
-  if (!user) {
-    res.redirect("/login");
-  } else {
-    const shortURL = req.params.id;
-
-    // Checking if the shortURL exists in your database
-    if (!urlDatabase[shortURL]) {
-      return res.status(404).send(`Error 404: The URL does not exist!`);
-    }
-
-    // Ensuring the user is authorized and exists
-    if (userId !== urlDatabase[shortURL].userId) {
-      return res.status(403).send(`Error 403: Unauthorized access!`);
-    }
-
-    const longURL = urlDatabase[shortURL].longURL; // Fetching longURL
-    const templateVars = {
-      id: shortURL,
-      longURL: longURL, // Make sure this matches what's expected in your ejs template
-      user: user,
-    };
-
-    res.render("urls_show", templateVars); // Rendering the page with the correct information
+  if (userId !== urlDatabase[shortURL].userId) {
+    return res.status(403).send(`Error 403: Unauthorized access!`);
   }
+
+  const longURL = urlDatabase[shortURL].longURL; // Fetching longURL
+  const templateVars = {
+    id: shortURL,
+    longURL: longURL, // Make sure this matches what's expected in your ejs template
+    user: user,
+  };
+
+  res.render("urls_show", templateVars); // Rendering the page with the correct information
 });
 
 app.post("/register", (req, res) => {
@@ -224,14 +200,9 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls", accessBouncer, (req, res) => {
   const userId = req.session.userId;
-
-  if (!userId) {
-    res.send("Please login to shorten URLs");
-    return;
-  }
-
+  const user = users[userId];
   const longURL = req.body.longURL;
 
   if (!longURL) {
@@ -245,28 +216,16 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  const userId = req.session.userId;
-  const id = req.params.id;
-
-  if (!userId) {
-    res.redirect("/login");
-  }
-
-  delete urlDatabase[id];
+app.post("/urls/:id/delete", accessBouncer, (req, res) => {
+  const shortURL = req.params.id;
+  delete urlDatabase[shortURL];
 
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:id/edit", (req, res) => {
+app.post("/urls/:id/edit", accessBouncer, (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
-
-  if (!user) {
-    res.send("Please login to edit URLs");
-    return;
-  }
-
   const longURL = req.body.newLongURL;
   const shortURL = req.params.id;
 

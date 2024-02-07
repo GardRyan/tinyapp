@@ -25,13 +25,20 @@ const urlDatabase = {
 const getUserByEmail = function (email, urlDatabase) {
   for (let userId in urlDatabase) {
     const user = urlDatabase[userId];
-
     if (user.email === email) {
       return user;
     }
   }
-
   return null;
+};
+
+const accessBouncer = function (req, res, next) {
+  const userId = req.session.userId;
+  const user = users[userId];
+  if (!user) {
+    res.redirect("/login");
+  }
+  next();
 };
 
 function generateRandomString() {
@@ -59,6 +66,7 @@ module.exports = {
   getUserByEmail,
   generateRandomString,
   urlsForUser,
+  accessBouncer,
   users,
   urlDatabase,
 };
